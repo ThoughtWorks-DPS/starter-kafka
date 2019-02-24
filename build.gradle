@@ -1,0 +1,116 @@
+buildscript {
+	ext {
+		springBootVersion = '2.1.3.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+plugins {
+	id 'com.palantir.docker' version '0.19.2'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.palantir.docker'
+
+apply plugin: 'io.spring.dependency-management'
+//apply plugin: 'org.unbroken-dome.test-sets'
+
+group = 'io.twdps.starter'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { url "https://repo.spring.io/milestone" }
+	maven {
+		url "s3://maven.k8starter.twdps.io/release/"
+		authentication {
+			awsIm(AwsImAuthentication) // load from EC2 role or env var
+		}
+	}
+
+}
+
+//Configures the classpath and the source and resource directories
+//of the integrationTest task.
+sourceSets {
+	//Declaring this source set creates compile time and runtime configurations for it.
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources.srcDir file('src/integration-test/resources')
+	}
+}
+
+//Configures the compile and runtime configurations for our integration tests
+//and includes the dependencies of the test task.
+configurations {
+	integrationTestImplementation.extendsFrom testImplementation
+	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+ext.dockerImageTag = (project.hasProperty("buildNumber") ? project.version + "-" + buildNumber: "1")
+
+
+bootJar {
+	baseName = 'starter-kafka'
+	version =  dockerImageTag
+	archiveName = 'starter-kafka-lastest.jar'
+	requiresUnpack '**/errorhandler-*.jar'
+}
+
+docker {
+	dependsOn build
+	name "quay.io/thoughtworks_aelab/starter-kafka:${bootJar.version}"
+	files archivePath
+	buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
+}
+
+
+dependencies {
+	implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.kafka:spring-kafka'
+	compile 'org.slf4j:slf4j-api:1.7.25'
+	compile 'io.twdps.starter.errors:exceptions:0.5'
+	compile 'io.twdps.starter.errors:error-handling:0.0.5.2-RELEASE'
+	compile 'io.twdps.starter.logging:logger:0.5'
+	runtime 'io.micrometer:micrometer-registry-prometheus:1.0.4'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
+	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+}
+
+
+//Create the task that runs the integration tests found from the
+//configured source directory and uses the correct classpath.
+task integrationTest(type: Test) {
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	outputs.upToDateWhen { false } //assure they are run even when the code hasn't changed
+	//assure that the gradle wrapper passes command line system properties to the tests
+	systemProperties System.properties
+}
+
+//Ensure that our unit tests are run before our integration tests
+integrationTest.mustRunAfter test
+
+processResources {
+	expand(project.properties)
+}
+
+tasks.withType(Test) {
+	useJUnitPlatform()
+}
