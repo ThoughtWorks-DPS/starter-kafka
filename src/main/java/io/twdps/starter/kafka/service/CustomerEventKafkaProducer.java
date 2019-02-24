@@ -15,7 +15,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class EventProducer implements InitializingBean {
+public class EventProducer {
 
   public static Logger logger = LoggerFactory.getLogger(EventProducer.class);
 
@@ -31,11 +31,5 @@ public class EventProducer implements InitializingBean {
   public ListenableFuture<SendResult<Integer, CustomerEventMessage>> sendMessage(final CustomerEventMessage message) {
     ListenableFuture<SendResult<Integer, CustomerEventMessage>> future = this.template.send(starterTopic, message.getEventId(), message);
     return future;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    simulatedEventId = new AtomicInteger();
-    simulatedEventId.set(0);
   }
 }
