@@ -9,8 +9,6 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -21,31 +19,28 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class EventSimulatorService {
+public class EventProcessingService {
   private static final Logger logger =
       LoggerFactory.getLogger(EventController.class);
   private AtomicInteger simulatedEventId;
   private Random random;
 
   @Autowired
-  private EventProducer eventProducer;
+  private CustomerEventKafkaProducer eventProducer;
 
-  public EventSimulatorService() {
+  public EventProcessingService() {
     this.simulatedEventId = new AtomicInteger();
     this.simulatedEventId.set(0);
     random = new Random();
   }
 
-  public CustomerEventMessage createSimulatedEvent(CustomerEvent customerEvent) {
-
-    int eventId = simulatedEventId.incrementAndGet();
-    long modified = ZonedDateTime.now().toEpochSecond();
-    return new CustomerEventMessage(eventId, customerEvent.getCustomerId(), customerEvent.getCreatedAt(), modified, customerEvent.getType());
-  }
-
   public EventKafkaMetadata createAndSendEvent(CustomerEvent customerEvent) {
 
+    // create an entity which may contain more information to help routing processing
+    // down the event chain - here we add a modified time and create a unique event id
     CustomerEventMessage customerEventMessage = createSimulatedEvent(customerEvent);
+
+    //call the kafka producer to send and then process the result
     ListenableFuture<SendResult<Integer, CustomerEventMessage>> future
         = eventProducer.sendMessage(customerEventMessage);
 
@@ -53,7 +48,7 @@ public class EventSimulatorService {
       SendResult<Integer, CustomerEventMessage> sendResult = future.get();
       CustomerEventMessage cem = sendResult.getProducerRecord().value();
       RecordMetadata recordMetadata = sendResult.getRecordMetadata();
-      EventKafkaMetadata eventKafkaMetadata = new EventKafkaMetadata(cem.getEventId(),recordMetadata);
+      EventKafkaMetadata eventKafkaMetadata = new EventKafkaMetadata(customerEvent.getCustomerId(),cem.getEventId(),recordMetadata);
       logger.info("successfully wrote eventId:{}, to partition:{} with offset:{}"
           ,eventKafkaMetadata.getEventId(),eventKafkaMetadata.getPartition(),eventKafkaMetadata.getOffset());
       return eventKafkaMetadata;
@@ -66,4 +61,10 @@ public class EventSimulatorService {
     }
   }
 
+  protected CustomerEventMessage createSimulatedEvent(CustomerEvent customerEvent) {
+
+    int eventId = simulatedEventId.incrementAndGet();
+    long modified = ZonedDateTime.now().toEpochSecond();
+    return new CustomerEventMessage(eventId, customerEvent.getCustomerId(), customerEvent.getCreatedAt(), modified, customerEvent.getType());
+  }
 }

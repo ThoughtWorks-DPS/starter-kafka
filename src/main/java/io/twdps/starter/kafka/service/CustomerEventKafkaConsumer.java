@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CountDownLatch;
 
 @Service
-public class EventConsumer {
+public class CustomerEventKafkaConsumer {
 
-  public static Logger logger = LoggerFactory.getLogger(EventConsumer.class);
+  public static Logger logger = LoggerFactory.getLogger(CustomerEventKafkaConsumer.class);
 
   private CountDownLatch latch = new CountDownLatch(1);
 

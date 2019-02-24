@@ -2,7 +2,8 @@ package io.twdps.starter.kafka;
 
 import io.twdps.starter.kafka.domain.CustomerEvent;
 import io.twdps.starter.kafka.domain.CustomerEventMessage;
-import io.twdps.starter.kafka.service.EventConsumer;
+import io.twdps.starter.kafka.domain.EventKafkaMetadata;
+import io.twdps.starter.kafka.service.CustomerEventKafkaConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,7 +40,7 @@ public class KafkaProducerConsumerTest {
   private TestRestTemplate restTemplate;
 
   @Autowired
-  private EventConsumer eventConsumer;
+  private CustomerEventKafkaConsumer eventConsumer;
 
   @BeforeEach
   private void setup() {
@@ -52,13 +54,12 @@ public class KafkaProducerConsumerTest {
   public void testReceive() throws Exception {
 
     HttpEntity<CustomerEvent> request = new HttpEntity<>(customerEvent);
-
-    ResponseEntity<CustomerEventMessage> response = this.restTemplate.postForEntity("http://localhost:" + port + "/events/customer", request,
-        CustomerEventMessage.class);
+    ResponseEntity<EventKafkaMetadata> response = this.restTemplate.postForEntity("http://localhost:" + port + "/events/customer", request,
+        EventKafkaMetadata.class);
     eventConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
-
     assertEquals(response.getStatusCode(), HttpStatus.OK);
     assertEquals(eventConsumer.getLatch().getCount(), 0);
-
+    assertEquals(response.getBody().getCustomerId(),customerEvent.getCustomerId());
+    assertTrue(response.getBody().getOffset() > -1);
   }
 }

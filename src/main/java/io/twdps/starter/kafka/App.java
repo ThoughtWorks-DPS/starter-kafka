@@ -1,6 +1,6 @@
 package io.twdps.starter.kafka;
 
-import io.twdps.starter.kafka.service.EventSimulatorService;
+import io.twdps.starter.kafka.service.EventProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class App {
   public static Logger logger = LoggerFactory.getLogger(App.class);
 
   @Autowired
-  private EventSimulatorService simulatorService;
+  private EventProcessingService simulatorService;
 
   public static void main(String[] args) {
     SpringApplication.run(App.class, args);

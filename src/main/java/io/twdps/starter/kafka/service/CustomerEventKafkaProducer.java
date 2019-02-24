@@ -3,7 +3,6 @@ package io.twdps.starter.kafka.service;
 import io.twdps.starter.kafka.domain.CustomerEventMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -15,9 +14,9 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class EventProducer {
+public class CustomerEventKafkaProducer {
 
-  public static Logger logger = LoggerFactory.getLogger(EventProducer.class);
+  public static Logger logger = LoggerFactory.getLogger(CustomerEventKafkaProducer.class);
 
   @Value("${kafka.topic}")
   private String starterTopic;

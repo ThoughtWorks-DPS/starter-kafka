@@ -85,7 +85,6 @@ dependencies {
 	compile 'org.slf4j:slf4j-api:1.7.25'
 	compile 'io.twdps.starter.errors:exceptions:0.5'
 	compile 'io.twdps.starter.errors:error-handling:0.0.5.2-RELEASE'
-	compile 'io.twdps.starter.logging:logger:0.5'
 	runtime 'io.micrometer:micrometer-registry-prometheus:1.0.4'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'

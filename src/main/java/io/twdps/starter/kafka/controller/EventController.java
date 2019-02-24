@@ -1,10 +1,13 @@
 package io.twdps.starter.kafka.controller;
 
 
+import io.twdps.starter.errors.exceptions.DownstreamTimeoutException;
 import io.twdps.starter.kafka.domain.CustomerEvent;
 import io.twdps.starter.kafka.domain.CustomerEventMessage;
-import io.twdps.starter.kafka.service.EventProducer;
-import io.twdps.starter.kafka.service.EventSimulatorService;
+import io.twdps.starter.kafka.domain.EventKafkaMetadata;
+import io.twdps.starter.kafka.service.CustomerEventKafkaProducer;
+import io.twdps.starter.kafka.service.EventProcessingService;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,45 +28,18 @@ public class EventController {
       LoggerFactory.getLogger(EventController.class);
 
   @Autowired
-  private EventSimulatorService eventSimulatorService;
+  private EventProcessingService eventProcessingService;
 
   @Autowired
-  private EventProducer eventProducer;
+  private CustomerEventKafkaProducer eventProducer;
 
   @PostMapping("/events/customer")
-  public ResponseEntity<CustomerEventMessage> createCustomerEventMessage(
+  public ResponseEntity<EventKafkaMetadata> createCustomerEventMessage(
       @RequestBody CustomerEvent customerEvent) {
 
-    CustomerEventMessage customerEventMessage = eventSimulatorService.createSimulatedEvent(customerEvent);
-    ListenableFuture<SendResult<Integer, CustomerEventMessage>> future
-        = eventProducer.sendMessage(customerEventMessage);
-
-    try {
-      SendResult<Integer, CustomerEventMessage> sendResult = future.get();
-    } catch (InterruptedException e) {
-
-    } catch (ExecutionException e) {
-      e.printStackTrace();
-    }
-
-    /*
-    future.addCallback(new ListenableFutureCallback<>() {
-
-      @Override
-      public void onSuccess(SendResult<Integer, CustomerEventMessage> result) {
-        logger.info("Success sending message");
-      }
-
-      @Override
-      public void onFailure(Throwable ex) {
-        logger.error("Failure to send message");
-      }
-
-    });
-     */
-    //handle errors?
-    return new ResponseEntity<CustomerEventMessage>(customerEventMessage, HttpStatus.OK);
-  }
+    EventKafkaMetadata eventKafkaMetadata = eventProcessingService.createAndSendEvent(customerEvent);
+    return new ResponseEntity<EventKafkaMetadata>(eventKafkaMetadata, HttpStatus.OK);
+ }
 }
 
 
