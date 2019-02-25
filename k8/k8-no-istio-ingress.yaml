@@ -1,0 +1,9 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: starter-ingress
+  namespace: dev
+spec:
+  backend:
+    serviceName: starter-kafka
+    servicePort: 8082

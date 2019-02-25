@@ -1,0 +1,16 @@
+# label of status: released' indicates the version that's considered released in
+# that namespace
+apiVersion: v1
+kind: Service
+metadata:
+  name: starter-kafka
+  namespace: dev
+  labels:
+    app: starter-kafka
+spec:
+#  type: LoadBalancer
+  ports:
+  - port: 8082
+    name: http
+  selector:
+    app: starter-kafka

@@ -2,7 +2,7 @@ apiVersion: kafka.strimzi.io/v1alpha1
 kind: Kafka
 metadata:
   name: starter-cluster
-  namespace: default
+  namespace: dev
 spec:
   kafka:
     version: 2.1.0

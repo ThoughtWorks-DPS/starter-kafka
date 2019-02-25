@@ -1,0 +1,28 @@
+# Default base VirtualService
+# Does not setup alternate routing rules for versions or headers
+# it does however setup a new VS in the right namespace as the service
+# moves from {NAMESPACE} -> test -> prod
+# Canary VirtualService
+# Sets up a weight for the canary releases
+# it does however setup a new VS in the right namespace as the service
+# moves from {NAMESPACE} -> test -> prod
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: starter-kafka-virtualservice
+  namespace: dev
+spec:
+  hosts:
+  - "starter-kafka.dev.start.twdps.io"
+  gateways:
+  - starter-kafka-gateway-dev
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: starter-kafka
+        subset: LATEST # change the destination rule to change what 'version' LATEST is pointing too
+    timeout: 2s # initial timeout before declaring a 503 or triggering an initial retry
+    retries: # example setup for retries and timeout that triggers a new retry
+      attempts: 3
+      perTryTimeout: 2s

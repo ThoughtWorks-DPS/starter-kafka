@@ -29,7 +29,7 @@ public class KafkaConfiguration {
 
   public static Logger logger = LoggerFactory.getLogger(KafkaConfiguration.class);
 
-  @Value("${kafka.brokerURL}")
+  @Value("${kafka.brokers}")
   private String kafkaBrokerURL;
 
   @Value("${kafka.topic}")
@@ -57,6 +57,7 @@ public class KafkaConfiguration {
   @Bean
   public Map<String, Object> producerConfigs() {
     logger.info("THIS IS THE KAFKA BROKERS URL->{}", kafkaBrokerURL);
+    logger.info("THIS IS THE KAFKA TOPIC->{}",starterTopic);
     Map<String, Object> props = new HashMap<>();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokerURL);
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);

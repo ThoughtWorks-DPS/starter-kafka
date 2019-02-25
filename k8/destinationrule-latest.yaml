@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: starter-kafka
+  namespace: dev
+spec:
+  host: starter-kafka.dev.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+  subsets:
+  - name: LATEST
+    labels:
+      version: v0.0.3 # this is the the SWITCH - as we 'release' a version we set this here
