@@ -22,10 +22,10 @@ spec:
     resources:
       requests:
         cpu: 2
-        memory: 30G # should be 4.5*-Xmx at least
+        memory: 36G # should be 4.5*-Xmx at least
       limits:
         cpu: 4
-        memory: 30G
+        memory: 36G
     jvmOptions:
       "-Xmx": "8g"
       "-Xms": "8g"
@@ -34,6 +34,28 @@ spec:
         "MaxGCPauseMillis": "20"
         "ExplicitGCInvokesConcurrent": true
     config:
+      auto.create.topics.enable: false
+      unclean.leader.election: false
+      # how many paritions will it default to - set at a multiple of the # of replicas - for now 1*replicas
+      # Partition count is a topic-level setting, and the more partitions the greater parallelization and throughput.
+      # However, partitions also mean more replication latency, rebalances, and open server files.
+      num.partitions: 3
+      num.recovery.threads.per.data.dir: 1
+      # these 2 should == the # of brokers in the 'replicas' above
+      default.replication.factor: 3
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 1
+      # how long will you retain messages for?
+      log.retention.hours: 168
+      log.segment.bytes: 1073741824
+      log.retention.check.interval.ms: 300000
+      num.network.threads: 3
+      num.io.threads: 8
+      socket.send.buffer.bytes: 102400
+      socket.receive.buffer.bytes: 102400
+      socket.request.max.bytes: 104857600
+      group.initial.rebalance.delay.ms: 0
       offsets.topic.replication.factor: 3
       transaction.state.log.replication.factor: 3
       transaction.state.log.min.isr: 2

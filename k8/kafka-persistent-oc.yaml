@@ -36,11 +36,12 @@ spec:
         "MaxGCPauseMillis": "20"
         "ExplicitGCInvokesConcurrent": true
     config:
+      auto.create.topics.enable: false
       unclean.leader.election: false
     # how many paritions will it default to - set at a multiple of the # of replicas - for now 1*replicas
     # Partition count is a topic-level setting, and the more partitions the greater parallelization and throughput. 
     # However, partitions also mean more replication latency, rebalances, and open server files.
-      num.partitions: 13
+      num.partitions: 3
       num.recovery.threads.per.data.dir: 1
       # these 2 should == the # of brokers in the 'replicas' above
       default.replication.factor: 3
@@ -82,7 +83,7 @@ spec:
         memory: 8Gi # should be 2*-Xmx at least
       limits:
         cpu: 2
-        memory: 10Gi
+        memory: 8Gi
     jvmOptions:
       "-Xmx": "2g"
       "-Xms": "2g"
