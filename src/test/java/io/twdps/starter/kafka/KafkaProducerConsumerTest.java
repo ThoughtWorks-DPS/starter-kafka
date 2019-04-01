@@ -1,7 +1,6 @@
 package io.twdps.starter.kafka;
 
 import io.twdps.starter.kafka.domain.CustomerEvent;
-import io.twdps.starter.kafka.domain.CustomerEventMessage;
 import io.twdps.starter.kafka.domain.EventKafkaMetadata;
 import io.twdps.starter.kafka.service.CustomerEventKafkaConsumer;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,9 +56,10 @@ public class KafkaProducerConsumerTest {
     ResponseEntity<EventKafkaMetadata> response = this.restTemplate.postForEntity("http://localhost:" + port + "/events/customer", request,
         EventKafkaMetadata.class);
     eventConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
+    System.out.println("response->" + response.getStatusCode());
     assertEquals(response.getStatusCode(), HttpStatus.OK);
     assertEquals(eventConsumer.getLatch().getCount(), 0);
-    assertEquals(response.getBody().getCustomerId(),customerEvent.getCustomerId());
+    assertEquals(response.getBody().getCustomerId(), customerEvent.getCustomerId());
     assertTrue(response.getBody().getOffset() > -1);
   }
 }

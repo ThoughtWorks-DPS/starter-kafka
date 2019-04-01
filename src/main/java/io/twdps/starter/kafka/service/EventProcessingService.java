@@ -48,16 +48,16 @@ public class EventProcessingService {
       SendResult<Integer, CustomerEventMessage> sendResult = future.get();
       CustomerEventMessage cem = sendResult.getProducerRecord().value();
       RecordMetadata recordMetadata = sendResult.getRecordMetadata();
-      EventKafkaMetadata eventKafkaMetadata = new EventKafkaMetadata(customerEvent.getCustomerId(),cem.getEventId(),recordMetadata);
+      EventKafkaMetadata eventKafkaMetadata = new EventKafkaMetadata(customerEvent.getCustomerId(), cem.getEventId(), recordMetadata);
       logger.info("successfully wrote eventId:{}, to partition:{} with offset:{}"
-          ,eventKafkaMetadata.getEventId(),eventKafkaMetadata.getPartition(),eventKafkaMetadata.getOffset());
+          , eventKafkaMetadata.getEventId(), eventKafkaMetadata.getPartition(), eventKafkaMetadata.getOffset());
       return eventKafkaMetadata;
     } catch (InterruptedException e) {
       throw new DownstreamTimeoutException("500",
-          String.format("Interrupted Write to kafka. Cause: %s",e.getLocalizedMessage()));
+          String.format("Interrupted Write to kafka. Cause: %s", e.getLocalizedMessage()));
     } catch (ExecutionException e) {
       throw new DownstreamTimeoutException("500",
-          String.format("Exception writing to kafka. Cause: %s",e.getLocalizedMessage()));
+          String.format("Exception writing to kafka. Cause: %s", e.getLocalizedMessage()));
     }
   }
 

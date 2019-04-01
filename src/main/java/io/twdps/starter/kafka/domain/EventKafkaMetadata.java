@@ -10,12 +10,13 @@ public class EventKafkaMetadata {
   private long offset;
   private String topic;
 
-  public EventKafkaMetadata() {}
+  public EventKafkaMetadata() {
+  }
 
   public EventKafkaMetadata(int customerId, int eventId, RecordMetadata recordMetadata) {
     this.customerId = customerId;
     this.eventId = eventId;
-    if(recordMetadata.hasOffset()) {
+    if (recordMetadata.hasOffset()) {
       offset = recordMetadata.offset();
     } else {
       offset = -1l;

@@ -23,10 +23,8 @@ spec:
         env:
           - name: KAFKA_BROKERS
             value: "starter-cluster-kafka-bootstrap:9092"
-
           - name: KAFKA_TOPIC
             value: "customer"
-
           - name: NODE_NAME
             valueFrom:
               fieldRef:
